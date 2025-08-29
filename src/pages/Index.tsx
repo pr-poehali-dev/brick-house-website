@@ -1,8 +1,81 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Icon from "@/components/ui/icon";
+import { useState, useEffect } from "react";
 
 const Index = () => {
+  const [counters, setCounters] = useState({
+    experience: 0,
+    projects: 0,
+    clients: 0
+  });
+  
+  const [calcData, setCalcData] = useState({
+    area: '',
+    floors: '',
+    type: ''
+  });
+  
+  const [estimatedCost, setEstimatedCost] = useState(0);
+
+  useEffect(() => {
+    const animateCounters = () => {
+      const targets = { experience: 15, projects: 120, clients: 95 };
+      const duration = 2000;
+      const increment = 50;
+      
+      Object.keys(targets).forEach(key => {
+        let current = 0;
+        const target = targets[key as keyof typeof targets];
+        const step = target / (duration / increment);
+        
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          setCounters(prev => ({ ...prev, [key]: Math.floor(current) }));
+        }, increment);
+      });
+    };
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateCounters();
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+    
+    const statsElement = document.getElementById('stats-section');
+    if (statsElement) observer.observe(statsElement);
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  const calculateCost = () => {
+    if (!calcData.area || !calcData.floors || !calcData.type) return;
+    
+    const basePrice = {
+      'economy': 25000,
+      'standard': 35000,
+      'premium': 50000
+    };
+    
+    const floorMultiplier = calcData.floors === '2' ? 1.3 : 1;
+    const cost = parseInt(calcData.area) * basePrice[calcData.type as keyof typeof basePrice] * floorMultiplier;
+    
+    setEstimatedCost(cost);
+  };
+
   const handleWhatsAppClick = () => {
     window.open("https://wa.me/79892606158", "_blank");
   };
@@ -46,6 +119,179 @@ const Index = () => {
               </Button>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section id="stats-section" className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Icon name="Calendar" size={32} className="text-white" />
+              </div>
+              <div className="font-heading text-4xl font-bold text-primary mb-2">
+                {counters.experience}+
+              </div>
+              <p className="text-gray-600 font-semibold">Лет опыта</p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Icon name="Home" size={32} className="text-white" />
+              </div>
+              <div className="font-heading text-4xl font-bold text-primary mb-2">
+                {counters.projects}+
+              </div>
+              <p className="text-gray-600 font-semibold">Домов построено</p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Icon name="Users" size={32} className="text-white" />
+              </div>
+              <div className="font-heading text-4xl font-bold text-primary mb-2">
+                {counters.clients}%
+              </div>
+              <p className="text-gray-600 font-semibold">Довольных клиентов</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section className="py-16 lg:py-24 bg-secondary">
+        <div className="container mx-auto px-4">
+          <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 text-accent">
+            Наши Работы
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            <div className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+              <img 
+                src="/img/3e77469a-90ac-42b8-93a5-b3eaecb73903.jpg" 
+                alt="Современный кирпичный дом" 
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h4 className="font-heading text-xl font-bold mb-2">Современный Дом</h4>
+                  <p className="text-sm">250 м² • 2 этажа</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+              <img 
+                src="/img/558bcccd-08c8-4b31-a782-691d99ef754c.jpg" 
+                alt="Вилла с бассейном" 
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h4 className="font-heading text-xl font-bold mb-2">Премиум Вилла</h4>
+                  <p className="text-sm">400 м² • Бассейн</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+              <img 
+                src="/img/d31753cd-e6b6-48d7-84a0-2ff6d23a2e34.jpg" 
+                alt="Таунхаус" 
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h4 className="font-heading text-xl font-bold mb-2">Элегантный Таунхаус</h4>
+                  <p className="text-sm">180 м² • Современный дизайн</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Calculator Section */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-accent">
+              Рассчитать Стоимость
+            </h2>
+            <p className="text-gray-600 text-lg">
+              Получите предварительную оценку стоимости строительства вашего дома
+            </p>
+          </div>
+          
+          <Card className="max-w-xl mx-auto shadow-xl">
+            <CardHeader>
+              <CardTitle className="font-heading text-2xl text-center">Калькулятор стоимости</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="area" className="font-semibold">Площадь дома (м²)</Label>
+                <Input
+                  id="area"
+                  type="number"
+                  placeholder="Например, 150"
+                  value={calcData.area}
+                  onChange={(e) => setCalcData(prev => ({ ...prev, area: e.target.value }))}
+                  className="text-lg"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="floors" className="font-semibold">Количество этажей</Label>
+                <Select value={calcData.floors} onValueChange={(value) => setCalcData(prev => ({ ...prev, floors: value }))}>
+                  <SelectTrigger className="text-lg">
+                    <SelectValue placeholder="Выберите количество этажей" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 этаж</SelectItem>
+                    <SelectItem value="2">2 этажа</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="type" className="font-semibold">Класс отделки</Label>
+                <Select value={calcData.type} onValueChange={(value) => setCalcData(prev => ({ ...prev, type: value }))}>
+                  <SelectTrigger className="text-lg">
+                    <SelectValue placeholder="Выберите класс отделки" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="economy">Эконом (25 000 ₽/м²)</SelectItem>
+                    <SelectItem value="standard">Стандарт (35 000 ₽/м²)</SelectItem>
+                    <SelectItem value="premium">Премиум (50 000 ₽/м²)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button 
+                onClick={calculateCost}
+                className="w-full text-lg py-3 font-semibold"
+                size="lg"
+              >
+                Рассчитать стоимость
+              </Button>
+              
+              {estimatedCost > 0 && (
+                <div className="text-center p-6 bg-primary/10 rounded-lg animate-scale-in">
+                  <p className="text-lg mb-2 text-gray-600">Предварительная стоимость:</p>
+                  <div className="font-heading text-3xl font-bold text-primary mb-4">
+                    {estimatedCost.toLocaleString()} ₽
+                  </div>
+                  <p className="text-sm text-gray-500 mb-4">
+                    *Точная стоимость определяется после выезда специалиста
+                  </p>
+                  <Button onClick={handleWhatsAppClick} className="w-full">
+                    <Icon name="MessageCircle" className="mr-2" size={20} />
+                    Получить точный расчет
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </section>
 
